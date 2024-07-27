@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penguins</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container my-5">
+    <h1>Penguins</h1>
+    <form id="penguinForm">
+        <label for="penguin_id">Penguin ID:</label>
+        <input type="number" id="penguin_id" name="penguin_id" required><br><br>
+        <label for="species">Species:</label>
+        <input type="text" id="species" name="species" required><br><br>
+        <label for="island">Island:</label>
+        <input type="text" id="island" name="island" required><br><br>
+        <label for="bill_length_mm">Bill Length (mm):</label>
+        <input type="number" id="bill_length_mm" name="bill_length_mm" required><br><br>
+        <label for="bill_depth_mm">Bill Depth (mm):</label>
+        <input type="number" id="bill_depth_mm" name="bill_depth_mm" required><br><br>
+        <label for="flipper_length_mm">Flipper Length (mm):</label>
+        <input type="number" id="flipper_length_mm" name="flipper_length_mm" required><br><br>
+        <label for="body_mass_g">Body Mass (g):</label>
+        <input type="number" id="body_mass_g" name="body_mass_g" required><br><br>
+        <label for="sex">Sex:</label>
+        <input type="text" id="sex" name="sex" required><br><br>
+        <button type="submit">Add Penguin</button>
+    </form>
+    <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+            <th>Penguin ID</th>
+            <th>Species</th>
+            <th>Island</th>
+            <th>Bill Length (mm)</th>
+            <th>Bill Depth (mm)</th>
+            <th>Flipper Length (mm)</th>
+            <th>Body Mass (g)</th>
+            <th>Sex</th>
+        </tr>
+        </thead>
+        <tbody id="penguins-table-body">
+        <!-- Penguin data will be dynamically inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            url: 'http://localhost:8080/api/penguins',
+            type: 'GET',
+            success: function(data) {
+                var tableBody = $('#penguins-table-body');
+                $.each(data, function(index, penguin) {
+                    var row = '<tr>' +
+                        '<td>' + penguin.penguin_id + '</td>' +
+                        '<td>' + penguin.species + '</td>' +
+                        '<td>' + penguin.island + '</td>' +
+                        '<td>' + penguin.bill_length_mm + '</td>' +
+                        '<td>' + penguin.bill_depth_mm + '</td>' +
+                        '<td>' + penguin.flipper_length_mm + '</td>' +
+                        '<td>' + penguin.body_mass_g + '</td>' +
+                        '<td>' + penguin.sex + '</td>' +
+                        '</tr>';
+                    tableBody.append(row);
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching penguin data:', error);
+            }
+        });
+    });
+    $('#penguinForm').on('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Collect the form data
+        var formData = {
+            penguin_id: $('#penguin_id').val(),
+            species: $('#species').val(),
+            island: $('#island').val(),
+            bill_length_mm: $('#bill_length_mm').val(),
+            bill_depth_mm: $('#bill_depth_mm').val(),
+            flipper_length_mm: $('#flipper_length_mm').val(),
+            body_mass_g: $('#body_mass_g').val(),
+            sex: $('#sex').val()
+        };
+
+        // Get the CSRF token
+        var csrfToken = $("meta[name='_csrf']").attr("content");
+
+        // Use jQuery's $.post() function to send the data to the server
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:8080/api/penguins',
+            data: JSON.stringify(formData),
+            contentType: 'application/json; charset=utf-8',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(data) {
+                console.log('Penguin added:', data);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error adding penguin:', error);
+            }
+        });
+    });
+
+</script>
+</body>
+</html>
